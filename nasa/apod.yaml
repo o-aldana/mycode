@@ -1,0 +1,29 @@
+---
+- name: Ansible playbook interacting with 
+  hosts: localhost
+  connection: ansible.builtin.local  # default is ansible.builtin.ssh
+  
+  # define two variables
+  vars:
+      apod_url: "https://api.nasa.gov/planetary/apod?api_key=" # API to call
+      mykey: "{{ lookup('file', '~/nasa.key') }}"  # our api key
+
+  tasks:
+  - name: Send HTTP GET to NASA api
+    ansible.builtin.uri:
+      method: GET     # send this method
+      url: "{{ apod_url }}{{ mykey }}"
+    register: nasaread    # save everything is task did in the new variable nasaread
+    
+  - name: Display the contents of the variable 'nasaread'
+    ansible.builtin.debug:
+      var: nasaread
+      
+  - name: Display just the explanation
+    ansible.builtin.debug:
+      var: nasaread.json.get('explanation')
+      
+  - name: Display just the HDURL
+    ansible.builtin.debug:
+      var: nasaread.json.get('hdurl',"No HD URL for today!")
+
